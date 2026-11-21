@@ -174,7 +174,7 @@ jobs:
   #   APP_STORE_CONNECT_API_KEY        base64 of the .p8 API key (App Manager or Admin role)
   #   APP_STORE_CONNECT_API_KEY_ID     the key's ID
   #   APP_STORE_CONNECT_ISSUER_ID      the issuer ID shown above the keys list
-  #   APPLE_TEAM_ID                    (shared with the job above)
+  # The build is signed by team XS9W9A8FWM, so the API key must belong to it.
   # Signing certificates and profiles are created and managed by Xcode through
   # the API key (-allowProvisioningUpdates), so no .p12 is needed here.
   app-store:
@@ -199,7 +199,8 @@ jobs:
           ASC_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
           ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
-          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # The App Store team, which differs from the Developer ID team above.
+          TEAM_ID: XS9W9A8FWM
         run: |
           VERSION="${TAG#v}"
           if ! [[ "$VERSION" =~ ^[0-9]+(\.[0-9]+){0,2}$ ]]; then
