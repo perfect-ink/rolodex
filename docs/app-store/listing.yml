@@ -1,0 +1,84 @@
+# Rolodex's whole App Store listing in one file: the text App Store Connect shows,
+# the categories, and the App Review contact and notes. fastlane/Fastfile reads it
+# and pushes it with every release, so App Store Connect always matches this file.
+# Screenshots are the one thing elsewhere: screenshots/en-US/.
+#
+# Limits are Apple's; the Fastfile refuses to upload anything longer.
+
+locale: en-US
+
+name: "Rolodex: Contacts & Groups"     # 30, unique across the whole store
+subtitle: "Smart groups for Contacts"  # 30
+
+# 170. Can change any time without a new build or review.
+promotional_text: "Browse and edit your Mac's contacts, build smart groups from rules, and keep your groups tidy with Group Insights. Works on the Contacts you already have."
+
+# 4000
+description: |
+  Rolodex is a faster way to browse, edit and organize the contacts already on your Mac. It works directly on your Contacts, so every change shows up in the Contacts app and on your other devices through iCloud.
+
+  SMART GROUPS
+  • Build groups from rules, like everyone at a company or everyone with a job title
+  • Smart groups update themselves as your contacts change
+
+  GROUPS THAT ARE EASY TO MANAGE
+  • Add a contact to any of your groups right from their card
+  • Merge two groups into one
+  • Group Insights finds empty groups, contacts in no group, and groups that overlap
+
+  A CLEANER CONTACT LIST
+  • Hide the members of chosen groups from All Contacts
+  • Mark contacts as blocked so they stay out of your way in Rolodex
+
+  QUICK EDITING
+  • Edit names, phone numbers, emails, addresses, birthdays and more
+  • Copy any field with one click
+  • See a contact's address on a map
+  • Share a contact as a vCard
+  • Undo your last changes
+
+  PRIVATE BY DESIGN
+  Rolodex has no account and collects nothing. Your contacts stay in Contacts on your Mac. Smart group rules and hidden groups are saved on your Mac only.
+
+  Rolodex asks for access to Contacts the first time you open it. You can change this any time in System Settings → Privacy & Security → Contacts.
+
+# 100, comma separated, no spaces needed
+keywords: "contacts,groups,address book,smart groups,organize,people,vcard,crm,contact manager,rolodex"
+
+# "What's New" for this version. 4000
+release_notes: |
+  Rolodex's first release on the Mac App Store.
+
+support_url: https://perfectink.org/apps/rolodex.html
+marketing_url: https://perfectink.org/apps/rolodex.html
+privacy_url: https://github.com/perfect-ink/rolodex/blob/main/docs/PRIVACY.md
+
+copyright: "2026 Perfect Ink"
+primary_category: PRODUCTIVITY
+secondary_category: BUSINESS
+
+# App Review Information. The repo is public, so leave phone blank and set the
+# APP_REVIEW_PHONE repository secret instead (it wins over this field).
+review:
+  first_name: Felix
+  last_name: Dantoni
+  email: hello@perfectink.org
+  phone: ""
+  demo_required: false   # no sign-in, so no demo account
+  notes: |
+    Rolodex is a contacts manager for the Mac. It reads and edits the system Contacts database through the Contacts framework; it has no database of its own for contacts.
+
+    CONTACTS PERMISSION
+    On first launch macOS asks for access to Contacts. Please allow it. If access is denied, Rolodex shows a button that opens System Settings → Privacy & Security → Contacts.
+
+    HOW TO TEST
+    1. Allow Contacts access. Your contacts appear in the list, with groups in the sidebar.
+    2. Select a contact and edit a field, for example a phone number. The change is saved to Contacts.
+    3. In a contact's Groups section, add the contact to a group.
+    4. In the sidebar, create a Smart Group with a rule such as "Company contains Apple". Matching contacts appear in it.
+    5. Open Insights at the top of the sidebar to see empty groups and contacts that belong to no group.
+
+    ABOUT THE BUILD
+    No account or sign-in. No data is collected or sent anywhere. The only network use is Apple Maps: the map pane shows a contact's address and geocodes it with MapKit. Smart group rules and hidden-group settings are saved in the app's sandbox container. Purchases: none.
+
+    Contact for questions during review: hello@perfectink.org
