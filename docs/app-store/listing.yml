@@ -7,7 +7,7 @@
 
 locale: en-US
 
-name: "Rolodex: Contacts & Groups"     # 30, unique across the whole store
+name: "Rolodex"                        # 30, unique across the whole store
 subtitle: "Smart groups for Contacts"  # 30
 
 # 170. Can change any time without a new build or review.
