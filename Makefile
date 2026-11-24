@@ -11,10 +11,19 @@ INSTALL_DIR := /Applications
 # (the entitlements are still embedded). Release builds keep the project's signing.
 DEV_SIGNING := CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=
 
+# Mac App Store. The team that owns org.perfectink.rolodex on the App Store.
+TEAM_ID ?= XS9W9A8FWM
+APPSTORE_DIR := $(BUILD_DIR)/appstore
+APPSTORE_ARCHIVE := $(APPSTORE_DIR)/$(APP_NAME).xcarchive
+APPSTORE_PKG := $(APPSTORE_DIR)/$(APP_NAME).pkg
+# Optional App Store Connect API key (CI sets these). Without it, Xcode signs
+# with the Apple ID signed in under Xcode > Settings > Accounts.
+ASC_AUTH := $(if $(ASC_KEY_PATH),-authenticationKeyPath "$(ASC_KEY_PATH)" -authenticationKeyID "$(ASC_KEY_ID)" -authenticationKeyIssuerID "$(ASC_ISSUER_ID)",)
+
 APP_PATH_DEV := $(DERIVED_DATA)/Build/Products/$(DEV_CONFIGURATION)/$(APP_NAME).app
 APP_PATH_RELEASE := $(DERIVED_DATA)/Build/Products/$(RELEASE_CONFIGURATION)/$(APP_NAME).app
 
-.PHONY: all help setup dev dev-build test-contacts build clean open close install uninstall reinstall test
+.PHONY: all help setup dev dev-build test-contacts build clean open close install uninstall reinstall test appstore metadata submit
 
 ## Default target: same as `make setup` then `make dev`.
 all: setup dev
@@ -36,6 +45,11 @@ help:
 	@echo "  make install    Build for production and install to $(INSTALL_DIR)"
 	@echo "  make uninstall  Close the app and remove it from $(INSTALL_DIR)"
 	@echo "  make reinstall  make uninstall, then make install"
+	@echo ""
+	@echo "Mac App Store (see docs/app-store/README.md):"
+	@echo "  make appstore   Archive and export the signed App Store package to $(APPSTORE_PKG)"
+	@echo "  make metadata VERSION=x.y.z  Push docs/app-store/ to App Store Connect"
+	@echo "  make submit VERSION=x.y.z    Submit the newest processed build for review"
 	@echo ""
 	@echo "Environment:"
 	@echo "  make setup      Set up the environment if needed"
@@ -137,3 +151,28 @@ test-contacts: dev-build
 	@open -W -n --stderr "$(abspath $(BUILD_DIR))/Tests/contacts-selftest.log" "$(APP_PATH_DEV)" --args --contacts-selftest
 	@cat "$(BUILD_DIR)/Tests/contacts-selftest.log"
 	@grep -q "SELFTEST PASSED" "$(BUILD_DIR)/Tests/contacts-selftest.log"
+
+## Archive and export the signed Mac App Store package.
+## VERSION and BUILD_NUMBER override the ones in the VERSION file.
+appstore:
+	@rm -rf "$(APPSTORE_DIR)"
+	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -configuration $(RELEASE_CONFIGURATION) \
+		-archivePath "$(APPSTORE_ARCHIVE)" -allowProvisioningUpdates $(ASC_AUTH) \
+		DEVELOPMENT_TEAM=$(TEAM_ID) CODE_SIGN_STYLE=Automatic \
+		$(if $(VERSION),MARKETING_VERSION=$(VERSION),) $(if $(BUILD_NUMBER),CURRENT_PROJECT_VERSION=$(BUILD_NUMBER),) archive
+	xcodebuild -exportArchive -archivePath "$(APPSTORE_ARCHIVE)" \
+		-exportOptionsPlist Scripts/ExportOptions-AppStore.plist -exportPath "$(APPSTORE_DIR)" \
+		-allowProvisioningUpdates $(ASC_AUTH)
+	@pkgutil --check-signature "$(APPSTORE_PKG)"
+	@echo "Built $(APPSTORE_PKG)"
+
+## Push the App Store listing (docs/app-store/) to App Store Connect, and submit
+## a processed build for review. Need fastlane and the APP_STORE_CONNECT_API_KEY_*
+## variables described at the top of fastlane/Fastfile.
+metadata:
+	@[ -n "$(VERSION)" ] || { echo "Set VERSION (e.g. 1.0.0)"; exit 1; }
+	fastlane mac metadata version:$(VERSION)
+
+submit:
+	@[ -n "$(VERSION)" ] || { echo "Set VERSION (e.g. 1.0.0)"; exit 1; }
+	fastlane mac submit version:$(VERSION) $(if $(BUILD_NUMBER),build:$(BUILD_NUMBER),)
